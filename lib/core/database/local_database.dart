@@ -1,0 +1,104 @@
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
+
+class LocalDatabase {
+  LocalDatabase._();
+
+  static final instance = LocalDatabase._();
+  Database? _database;
+  static const _dbVersion = 3;
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+
+    final dir = await getApplicationDocumentsDirectory();
+    final path = p.join(dir.path, 'things_to_win.db');
+
+    _database = await openDatabase(
+      path,
+      version: _dbVersion,
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
+      onCreate: (db, version) async {
+        await _createSchemaV3(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS habit_entries(
+              habit_id TEXT NOT NULL,
+              day_key TEXT NOT NULL,
+              is_completed INTEGER NOT NULL,
+              completed_at TEXT,
+              PRIMARY KEY(habit_id, day_key),
+              FOREIGN KEY(habit_id) REFERENCES habits(id) ON DELETE CASCADE
+            )
+          ''');
+
+          final oldTable = await db.rawQuery(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='habit_completions'",
+          );
+          if (oldTable.isNotEmpty) {
+            await db.execute('''
+              INSERT OR REPLACE INTO habit_entries(habit_id, day_key, is_completed, completed_at)
+              SELECT habit_id, day, is_done, NULL FROM habit_completions
+            ''');
+            await db.execute('DROP TABLE habit_completions');
+          }
+
+          await db.execute(
+            'CREATE INDEX IF NOT EXISTS idx_habit_entries_habit_day ON habit_entries(habit_id, day_key)',
+          );
+        }
+
+        if (oldVersion < 3) {
+          await _ensureHabitColumn(db, 'category', "TEXT NOT NULL DEFAULT 'General'");
+          await _ensureHabitColumn(db, 'icon_key', "TEXT NOT NULL DEFAULT 'target'");
+        }
+      },
+    );
+
+    return _database!;
+  }
+
+  Future<void> _createSchemaV3(Database db) async {
+    await db.execute('''
+      CREATE TABLE habits(
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        category TEXT NOT NULL DEFAULT 'General',
+        icon_key TEXT NOT NULL DEFAULT 'target',
+        color_hex INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        is_archived INTEGER NOT NULL DEFAULT 0,
+        sort_order INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE habit_entries(
+        habit_id TEXT NOT NULL,
+        day_key TEXT NOT NULL,
+        is_completed INTEGER NOT NULL,
+        completed_at TEXT,
+        PRIMARY KEY(habit_id, day_key),
+        FOREIGN KEY(habit_id) REFERENCES habits(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_habit_entries_habit_day ON habit_entries(habit_id, day_key)',
+    );
+  }
+
+  Future<void> _ensureHabitColumn(Database db, String column, String sqlTypeAndConstraints) async {
+    final result = await db.rawQuery('PRAGMA table_info(habits)');
+    final exists = result.any((row) => row['name'] == column);
+    if (exists) {
+      return;
+    }
+    await db.execute('ALTER TABLE habits ADD COLUMN $column $sqlTypeAndConstraints');
+  }
+}
