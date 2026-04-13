@@ -23,7 +23,7 @@ class AppSettingsNotifier extends AsyncNotifier<AppSettings> {
     return repo.getSettings();
   }
 
-  Future<void> update(AppSettings settings) async {
+  Future<void> saveSettings(AppSettings settings) async {
     state = const AsyncValue.loading();
     final repo = await ref.read(settingsRepositoryProvider.future);
     await repo.saveSettings(settings);
@@ -32,7 +32,7 @@ class AppSettingsNotifier extends AsyncNotifier<AppSettings> {
 
   Future<void> setThemeMode(ThemeMode mode) async {
     final current = state.valueOrNull ?? await _loadCurrent();
-    await update(current.copyWith(themeMode: mode));
+    await saveSettings(current.copyWith(themeMode: mode));
   }
 
   Future<void> completeOnboarding() async {
@@ -40,7 +40,7 @@ class AppSettingsNotifier extends AsyncNotifier<AppSettings> {
     if (current.hasCompletedOnboarding) {
       return;
     }
-    await update(current.copyWith(hasCompletedOnboarding: true));
+    await saveSettings(current.copyWith(hasCompletedOnboarding: true));
   }
 
   Future<AppSettings> _loadCurrent() async {
