@@ -7,7 +7,7 @@ class LocalDatabase {
 
   static final instance = LocalDatabase._();
   Database? _database;
-  static const _dbVersion = 3;
+  static const _dbVersion = 4;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -24,18 +24,12 @@ class LocalDatabase {
       onCreate: (db, version) async {
         await _createSchemaV3(db);
       },
+      onOpen: (db) async {
+        await _repairSchema(db);
+      },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
-          await db.execute('''
-            CREATE TABLE IF NOT EXISTS habit_entries(
-              habit_id TEXT NOT NULL,
-              day_key TEXT NOT NULL,
-              is_completed INTEGER NOT NULL,
-              completed_at TEXT,
-              PRIMARY KEY(habit_id, day_key),
-              FOREIGN KEY(habit_id) REFERENCES habits(id) ON DELETE CASCADE
-            )
-          ''');
+          await _ensureHabitEntriesTable(db);
 
           final oldTable = await db.rawQuery(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='habit_completions'",
@@ -47,17 +41,23 @@ class LocalDatabase {
             ''');
             await db.execute('DROP TABLE habit_completions');
           }
-
-          await db.execute(
-            'CREATE INDEX IF NOT EXISTS idx_habit_entries_habit_day ON habit_entries(habit_id, day_key)',
-          );
         }
 
         if (oldVersion < 3) {
           await _ensureHabitColumn(
-              db, 'category', "TEXT NOT NULL DEFAULT 'General'");
+            db,
+            'category',
+            "TEXT NOT NULL DEFAULT 'General'",
+          );
           await _ensureHabitColumn(
-              db, 'icon_key', "TEXT NOT NULL DEFAULT 'target'");
+            db,
+            'icon_key',
+            "TEXT NOT NULL DEFAULT 'target'",
+          );
+        }
+
+        if (oldVersion < 4) {
+          await _repairSchema(db);
         }
       },
     );
@@ -80,8 +80,36 @@ class LocalDatabase {
       )
     ''');
 
+    await _ensureHabitEntriesTable(db);
+  }
+
+  Future<void> _repairSchema(Database db) async {
+    await _ensureHabitEntriesTable(db);
+    await _ensureHabitColumn(
+      db,
+      'category',
+      "TEXT NOT NULL DEFAULT 'General'",
+    );
+    await _ensureHabitColumn(
+      db,
+      'icon_key',
+      "TEXT NOT NULL DEFAULT 'target'",
+    );
+    await _ensureHabitColumn(
+      db,
+      'is_archived',
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _ensureHabitColumn(
+      db,
+      'sort_order',
+      'INTEGER NOT NULL DEFAULT 0',
+    );
+  }
+
+  Future<void> _ensureHabitEntriesTable(Database db) async {
     await db.execute('''
-      CREATE TABLE habit_entries(
+      CREATE TABLE IF NOT EXISTS habit_entries(
         habit_id TEXT NOT NULL,
         day_key TEXT NOT NULL,
         is_completed INTEGER NOT NULL,
@@ -91,18 +119,22 @@ class LocalDatabase {
       )
     ''');
     await db.execute(
-      'CREATE INDEX idx_habit_entries_habit_day ON habit_entries(habit_id, day_key)',
+      'CREATE INDEX IF NOT EXISTS idx_habit_entries_habit_day ON habit_entries(habit_id, day_key)',
     );
   }
 
   Future<void> _ensureHabitColumn(
-      Database db, String column, String sqlTypeAndConstraints) async {
+    Database db,
+    String column,
+    String sqlTypeAndConstraints,
+  ) async {
     final result = await db.rawQuery('PRAGMA table_info(habits)');
     final exists = result.any((row) => row['name'] == column);
     if (exists) {
       return;
     }
     await db.execute(
-        'ALTER TABLE habits ADD COLUMN $column $sqlTypeAndConstraints');
+      'ALTER TABLE habits ADD COLUMN $column $sqlTypeAndConstraints',
+    );
   }
 }
