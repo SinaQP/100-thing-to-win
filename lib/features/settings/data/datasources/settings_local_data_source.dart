@@ -25,7 +25,8 @@ class SharedPrefsSettingsDataSource implements SettingsLocalDataSource {
       themeMode: _prefs.getString(_themeModeKey) ?? 'system',
       dailyReminderEnabled: _prefs.getBool(_dailyReminderEnabledKey) ?? false,
       showArchivedHabits: _prefs.getBool(_showArchivedHabitsKey) ?? false,
-      hasCompletedOnboarding: _prefs.getBool(_hasCompletedOnboardingKey) ?? false,
+      hasCompletedOnboarding:
+          _prefs.getBool(_hasCompletedOnboardingKey) ?? false,
     );
     return model.toEntity();
   }
@@ -36,7 +37,8 @@ class SharedPrefsSettingsDataSource implements SettingsLocalDataSource {
     await _prefs.setString(_themeModeKey, model.themeMode);
     await _prefs.setBool(_dailyReminderEnabledKey, model.dailyReminderEnabled);
     await _prefs.setBool(_showArchivedHabitsKey, model.showArchivedHabits);
-    await _prefs.setBool(_hasCompletedOnboardingKey, model.hasCompletedOnboarding);
+    await _prefs.setBool(
+        _hasCompletedOnboardingKey, model.hasCompletedOnboarding);
   }
 
   @override

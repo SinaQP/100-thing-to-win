@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:things_to_win/core/constants/app_routes.dart';
+import 'package:things_to_win/core/theme/app_colors.dart';
+import 'package:things_to_win/core/theme/app_motion.dart';
+import 'package:things_to_win/core/theme/app_spacing.dart';
+import 'package:things_to_win/core/widgets/app_buttons.dart';
+import 'package:things_to_win/core/widgets/app_card.dart';
 import 'package:things_to_win/core/widgets/app_page_scaffold.dart';
+import 'package:things_to_win/core/widgets/app_progress_bar.dart';
+import 'package:things_to_win/core/widgets/app_section_header.dart';
+import 'package:things_to_win/core/widgets/app_state_view.dart';
 import 'package:things_to_win/features/habits/domain/entities/habit.dart';
 import 'package:things_to_win/features/habits/presentation/constants/habit_form_options.dart';
 import 'package:things_to_win/features/habits/presentation/providers/habits_providers.dart';
@@ -48,6 +56,12 @@ class HabitsScreen extends ConsumerWidget {
     return AppPageScaffold(
       title: 'Habits',
       subtitle: 'Design the standards that move your life forward.',
+      trailing: AppPrimaryButton(
+        label: 'Add habit',
+        icon: Icons.add_rounded,
+        expand: false,
+        onPressed: () => context.push(AppRoutes.habitCreate),
+      ),
       body: habitsAsync.when(
         data: (habits) {
           if (habits.isEmpty) {
@@ -62,45 +76,96 @@ class HabitsScreen extends ConsumerWidget {
           }
 
           return todayCompletionAsync.when(
-            data: (completionMap) {
-              final completedCount = habits.where((habit) => completionMap[habit.id] ?? false).length;
-              final progressPercent = habits.isEmpty ? 0 : ((completedCount / habits.length) * 100).round();
-
-              return ListView(
-                children: [
-                  _TodayProgressCard(
-                    totalCount: habits.length,
-                    completedCount: completedCount,
-                    progressPercent: progressPercent,
-                    onCreatePressed: () => context.push(AppRoutes.habitCreate),
-                  ),
-                  const SizedBox(height: 12),
-                  ...habits.map(
-                    (habit) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _HabitTile(
-                        habit: habit,
-                        completedToday: completionMap[habit.id] ?? false,
-                        onToggle: (value) async {
-                          await ref.read(habitsActionsProvider).toggleTodayCompletion(
-                                habitId: habit.id,
-                                isCompleted: value,
-                              );
-                        },
-                        onMenuAction: (action) => _onMenuAction(context, ref, habit, action),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) => Center(child: Text('Failed to load completion data: $error')),
+            data: (completionMap) => _HabitsContent(
+              habits: habits,
+              completionMap: completionMap,
+              onCreatePressed: () => context.push(AppRoutes.habitCreate),
+              onToggle: (habitId, value) async {
+                await ref.read(habitsActionsProvider).toggleTodayCompletion(
+                      habitId: habitId,
+                      isCompleted: value,
+                    );
+              },
+              onMenuAction: (habit, action) =>
+                  _onMenuAction(context, ref, habit, action),
+            ),
+            loading: () =>
+                const AppLoadingState(label: 'Loading today progress...'),
+            error: (error, stackTrace) => AppErrorState(
+              title: 'Could not load today progress',
+              message: error.toString(),
+            ),
           );
         },
-        error: (error, stackTrace) => Center(child: Text('Failed to load habits: $error')),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => AppErrorState(
+          title: 'Could not load habits',
+          message: error.toString(),
+        ),
+        loading: () => const AppLoadingState(label: 'Loading habits...'),
       ),
+    );
+  }
+}
+
+class _HabitsContent extends StatelessWidget {
+  const _HabitsContent({
+    required this.habits,
+    required this.completionMap,
+    required this.onCreatePressed,
+    required this.onToggle,
+    required this.onMenuAction,
+  });
+
+  final List<Habit> habits;
+  final Map<String, bool> completionMap;
+  final VoidCallback onCreatePressed;
+  final Future<void> Function(String habitId, bool value) onToggle;
+  final Future<void> Function(Habit habit, _HabitMenuAction action)
+      onMenuAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final completedCount =
+        habits.where((habit) => completionMap[habit.id] ?? false).length;
+    final progress = habits.isEmpty ? 0.0 : completedCount / habits.length;
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xxxl),
+      children: [
+        AppFadeSlideIn(
+          child: _TodayProgressCard(
+            totalCount: habits.length,
+            completedCount: completedCount,
+            progress: progress,
+            onCreatePressed: onCreatePressed,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        AppFadeSlideIn(
+          delay: const Duration(milliseconds: 40),
+          child: AppSectionHeader(
+            title: 'Your standards',
+            subtitle: completedCount == habits.length
+                ? 'Everything is complete for today.'
+                : 'Stay focused on the next win. Every check keeps the streak alive.',
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ...habits.asMap().entries.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: AppFadeSlideIn(
+                  delay: Duration(milliseconds: 70 + (entry.key * 35)),
+                  child: _HabitTile(
+                    habit: entry.value,
+                    completedToday: completionMap[entry.value.id] ?? false,
+                    onToggle: (value) => onToggle(entry.value.id, value),
+                    onMenuAction: (action) => onMenuAction(entry.value, action),
+                  ),
+                ),
+              ),
+            ),
+      ],
     );
   }
 }
@@ -109,60 +174,130 @@ class _TodayProgressCard extends StatelessWidget {
   const _TodayProgressCard({
     required this.totalCount,
     required this.completedCount,
-    required this.progressPercent,
+    required this.progress,
     required this.onCreatePressed,
   });
 
   final int totalCount;
   final int completedCount;
-  final int progressPercent;
+  final double progress;
   final VoidCallback onCreatePressed;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.appColors;
+    final progressPercent = (progress * 100).round();
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary.withOpacity(0.17),
-            theme.colorScheme.secondary.withOpacity(0.10),
-          ],
-        ),
+    return AppCard(
+      borderRadius: BorderRadius.circular(28),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          colors.card,
+          colors.accentSoft.withValues(alpha: colors.isDark ? 0.55 : 0.9),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  'Today: $completedCount / $totalCount completed',
-                  style: theme.textTheme.titleMedium,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('TODAY',
+                        style: theme.textTheme.labelSmall
+                            ?.copyWith(color: colors.accentStrong)),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      '$completedCount of $totalCount habits complete',
+                      style: theme.textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      progress == 1
+                          ? 'You closed the day with full momentum.'
+                          : 'Keep the pace calm and consistent. One completed action at a time.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
                 ),
               ),
-              FilledButton.tonalIcon(
-                onPressed: onCreatePressed,
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Add'),
+              const SizedBox(width: AppSpacing.lg),
+              AppScaleIn(
+                delay: const Duration(milliseconds: 80),
+                child: AppProgressRing(
+                  value: progress,
+                  label: '$progressPercent%',
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              minHeight: 10,
-              value: totalCount == 0 ? 0 : completedCount / totalCount,
-            ),
+          const SizedBox(height: AppSpacing.xl),
+          AppProgressBar(value: progress),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: _ProgressMeta(
+                  label: 'Completed today',
+                  value: '$completedCount',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _ProgressMeta(
+                  label: 'Remaining',
+                  value:
+                      '${(totalCount - completedCount).clamp(0, totalCount)}',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              AppGhostButton(
+                label: 'New habit',
+                icon: Icons.add_rounded,
+                onPressed: onCreatePressed,
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text('$progressPercent% complete today', style: theme.textTheme.bodyMedium),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgressMeta extends StatelessWidget {
+  const _ProgressMeta({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: colors.surfaceElevated
+            .withValues(alpha: colors.isDark ? 0.72 : 0.7),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: theme.textTheme.labelSmall),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(value, style: theme.textTheme.titleMedium),
         ],
       ),
     );
@@ -185,71 +320,98 @@ class _HabitTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.appColors;
     final color = Color(habit.colorHex);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        leading: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.28),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+    return AppCard(
+      onTap: () => onToggle(!completedToday),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+      child: Row(
+        children: [
+          AppCompletionFeedback(
+            completed: completedToday,
+            child: AnimatedContainer(
+              duration: AppMotion.short,
+              curve: AppMotion.emphasisCurve,
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: completedToday ? 0.2 : 0.28),
+                    blurRadius: completedToday ? 12 : 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Icon(habitIconByKey(habit.iconKey), color: Colors.white),
-        ),
-        title: Text(
-          habit.title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            decoration: completedToday ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Wrap(
-            spacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  color: theme.colorScheme.surfaceContainerHighest,
-                ),
-                child: Text(habit.category, style: theme.textTheme.bodySmall),
-              ),
-              if (habit.description != null && habit.description!.isNotEmpty)
-                Text(habit.description!, style: theme.textTheme.bodySmall),
-            ],
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Checkbox(
-              value: completedToday,
-              onChanged: (value) => onToggle(value ?? false),
+              child: Icon(habitIconByKey(habit.iconKey), color: Colors.white),
             ),
-            PopupMenuButton<_HabitMenuAction>(
-              onSelected: onMenuAction,
-              itemBuilder: (context) => const [
-                PopupMenuItem(value: _HabitMenuAction.edit, child: Text('Edit')),
-                PopupMenuItem(value: _HabitMenuAction.archive, child: Text('Archive')),
-                PopupMenuItem(value: _HabitMenuAction.delete, child: Text('Delete')),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  habit.title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    decoration:
+                        completedToday ? TextDecoration.lineThrough : null,
+                    color: completedToday ? colors.textSecondary : null,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        color: colors.cardMuted,
+                      ),
+                      child: Text(habit.category,
+                          style: theme.textTheme.labelSmall),
+                    ),
+                    if (habit.description != null &&
+                        habit.description!.isNotEmpty)
+                      Text(
+                        habit.description!,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Column(
+            children: [
+              Checkbox(
+                value: completedToday,
+                onChanged: (value) => onToggle(value ?? false),
+              ),
+              PopupMenuButton<_HabitMenuAction>(
+                icon: const Icon(Icons.more_horiz_rounded),
+                onSelected: onMenuAction,
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                      value: _HabitMenuAction.edit, child: Text('Edit')),
+                  PopupMenuItem(
+                      value: _HabitMenuAction.archive, child: Text('Archive')),
+                  PopupMenuItem(
+                      value: _HabitMenuAction.delete, child: Text('Delete')),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

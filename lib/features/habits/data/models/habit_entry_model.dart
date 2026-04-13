@@ -19,7 +19,8 @@ class HabitEntryModel {
       habitId: habitId,
       day: DateTime.parse(dayKey),
       isCompleted: isCompleted,
-      completedAt: completedAtIso == null ? null : DateTime.parse(completedAtIso!),
+      completedAt:
+          completedAtIso == null ? null : DateTime.parse(completedAtIso!),
     );
   }
 

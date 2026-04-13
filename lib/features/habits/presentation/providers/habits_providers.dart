@@ -17,7 +17,8 @@ final localDatabaseProvider = FutureProvider<Database>((ref) async {
   return LocalDatabase.instance.database;
 });
 
-final habitsLocalDataSourceProvider = FutureProvider<HabitsLocalDataSource>((ref) async {
+final habitsLocalDataSourceProvider =
+    FutureProvider<HabitsLocalDataSource>((ref) async {
   final db = await ref.watch(localDatabaseProvider.future);
   return SqfliteHabitsLocalDataSource(db);
 });
@@ -33,15 +34,18 @@ final habitsListProvider = FutureProvider<List<Habit>>((ref) async {
   return usecase();
 });
 
-final habitByIdProvider = FutureProvider.family<Habit?, String>((ref, habitId) async {
+final habitByIdProvider =
+    FutureProvider.family<Habit?, String>((ref, habitId) async {
   final repository = await ref.watch(habitsRepositoryProvider.future);
   return repository.getHabitById(habitId);
 });
 
-final todayHabitCompletionsProvider = FutureProvider<Map<String, bool>>((ref) async {
+final todayHabitCompletionsProvider =
+    FutureProvider<Map<String, bool>>((ref) async {
   final repository = await ref.watch(habitsRepositoryProvider.future);
   final today = toDateOnly(DateTime.now());
-  final entries = await repository.getCompletionsForRange(from: today, to: today);
+  final entries =
+      await repository.getCompletionsForRange(from: today, to: today);
   final completionByHabitId = <String, bool>{};
   for (final entry in entries) {
     completionByHabitId[entry.habitId] = entry.isCompleted;
@@ -75,14 +79,17 @@ class HabitsActions {
     _refresh();
   }
 
-  Future<void> toggleTodayCompletion({required String habitId, required bool isCompleted}) async {
+  Future<void> toggleTodayCompletion(
+      {required String habitId, required bool isCompleted}) async {
     final repository = await _ref.read(habitsRepositoryProvider.future);
     final usecase = ToggleHabitCompletion(repository);
-    await usecase(habitId: habitId, day: DateTime.now(), isCompleted: isCompleted);
+    await usecase(
+        habitId: habitId, day: DateTime.now(), isCompleted: isCompleted);
     _refresh();
   }
 
-  Future<void> archiveHabit({required String habitId, required bool archived}) async {
+  Future<void> archiveHabit(
+      {required String habitId, required bool archived}) async {
     final repository = await _ref.read(habitsRepositoryProvider.future);
     await repository.archiveHabit(habitId: habitId, isArchived: archived);
     _refresh();

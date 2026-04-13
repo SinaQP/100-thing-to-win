@@ -15,13 +15,15 @@ class InsightsScreen extends StatelessWidget {
           PlaceholderCard(
             icon: Icons.local_fire_department_rounded,
             title: 'Streak Analytics',
-            description: 'Current streak, best streak, and weekly trend charts arrive in Phase 2.',
+            description:
+                'Current streak, best streak, and weekly trend charts arrive in Phase 2.',
           ),
           SizedBox(height: 12),
           PlaceholderCard(
             icon: Icons.percent_rounded,
             title: 'Completion Rate',
-            description: 'Rolling 7/30 day completion rates and habit-level rankings.',
+            description:
+                'Rolling 7/30 day completion rates and habit-level rankings.',
           ),
         ],
       ),

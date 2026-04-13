@@ -15,7 +15,8 @@ class HistoryScreen extends StatelessWidget {
           PlaceholderCard(
             icon: Icons.calendar_today_rounded,
             title: 'Calendar Heatmap',
-            description: 'Phase 2 adds monthly completion heatmap and per-day drilldown.',
+            description:
+                'Phase 2 adds monthly completion heatmap and per-day drilldown.',
           ),
           SizedBox(height: 12),
           PlaceholderCard(

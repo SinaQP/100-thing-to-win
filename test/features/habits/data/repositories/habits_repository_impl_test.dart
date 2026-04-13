@@ -24,7 +24,9 @@ class _FakeHabitsLocalDataSource implements HabitsLocalDataSource {
 
   @override
   Future<List<HabitModel>> getHabits({required bool includeArchived}) async {
-    final list = _habits.values.where((h) => includeArchived || !h.isArchived).toList(growable: false)
+    final list = _habits.values
+        .where((h) => includeArchived || !h.isArchived)
+        .toList(growable: false)
       ..sort((a, b) => a.order.compareTo(b.order));
     return list;
   }
@@ -35,7 +37,8 @@ class _FakeHabitsLocalDataSource implements HabitsLocalDataSource {
   }
 
   @override
-  Future<void> setHabitArchived({required String id, required bool isArchived}) async {
+  Future<void> setHabitArchived(
+      {required String id, required bool isArchived}) async {
     final current = _habits[id];
     if (current == null) return;
     _habits[id] = HabitModel(
@@ -76,7 +79,8 @@ class _FakeHabitsLocalDataSource implements HabitsLocalDataSource {
   }
 
   @override
-  Future<bool> isHabitCompleted({required String habitId, required DateTime day}) async {
+  Future<bool> isHabitCompleted(
+      {required String habitId, required DateTime day}) async {
     final key = '$habitId:${toDayKey(day)}';
     final entry = _entries[key];
     return entry?.isCompleted ?? false;
@@ -93,7 +97,8 @@ class _FakeHabitsLocalDataSource implements HabitsLocalDataSource {
 
     final list = _entries.values.where((entry) {
       if (habitId != null && entry.habitId != habitId) return false;
-      return entry.dayKey.compareTo(fromKey) >= 0 && entry.dayKey.compareTo(toKey) <= 0;
+      return entry.dayKey.compareTo(fromKey) >= 0 &&
+          entry.dayKey.compareTo(toKey) <= 0;
     }).toList(growable: false)
       ..sort((a, b) => a.dayKey.compareTo(b.dayKey));
 
@@ -142,7 +147,8 @@ void main() {
       expect(deleted, isNull);
     });
 
-    test('daily completion persists and completion flag is queryable', () async {
+    test('daily completion persists and completion flag is queryable',
+        () async {
       await repository.setHabitCompletion(
         HabitEntry(
           habitId: 'h1',

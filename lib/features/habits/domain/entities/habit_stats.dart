@@ -16,5 +16,6 @@ class HabitStats extends Equatable {
   final int totalDays;
 
   @override
-  List<Object?> get props => [currentStreak, bestStreak, completionRate, completedDays, totalDays];
+  List<Object?> get props =>
+      [currentStreak, bestStreak, completionRate, completedDays, totalDays];
 }

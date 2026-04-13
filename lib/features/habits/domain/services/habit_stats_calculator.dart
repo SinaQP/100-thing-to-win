@@ -57,7 +57,8 @@ class HabitStatsCalculator {
     }
 
     final completedCount = completedDays.length;
-    final completionRate = totalDays == 0 ? 0.0 : (completedCount / totalDays) * 100;
+    final completionRate =
+        totalDays == 0 ? 0.0 : (completedCount / totalDays) * 100;
 
     return HabitStats(
       currentStreak: currentStreak,

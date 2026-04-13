@@ -54,8 +54,10 @@ class LocalDatabase {
         }
 
         if (oldVersion < 3) {
-          await _ensureHabitColumn(db, 'category', "TEXT NOT NULL DEFAULT 'General'");
-          await _ensureHabitColumn(db, 'icon_key', "TEXT NOT NULL DEFAULT 'target'");
+          await _ensureHabitColumn(
+              db, 'category', "TEXT NOT NULL DEFAULT 'General'");
+          await _ensureHabitColumn(
+              db, 'icon_key', "TEXT NOT NULL DEFAULT 'target'");
         }
       },
     );
@@ -93,12 +95,14 @@ class LocalDatabase {
     );
   }
 
-  Future<void> _ensureHabitColumn(Database db, String column, String sqlTypeAndConstraints) async {
+  Future<void> _ensureHabitColumn(
+      Database db, String column, String sqlTypeAndConstraints) async {
     final result = await db.rawQuery('PRAGMA table_info(habits)');
     final exists = result.any((row) => row['name'] == column);
     if (exists) {
       return;
     }
-    await db.execute('ALTER TABLE habits ADD COLUMN $column $sqlTypeAndConstraints');
+    await db.execute(
+        'ALTER TABLE habits ADD COLUMN $column $sqlTypeAndConstraints');
   }
 }

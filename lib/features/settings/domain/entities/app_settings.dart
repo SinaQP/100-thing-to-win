@@ -24,10 +24,16 @@ class AppSettings extends Equatable {
       themeMode: themeMode ?? this.themeMode,
       dailyReminderEnabled: dailyReminderEnabled ?? this.dailyReminderEnabled,
       showArchivedHabits: showArchivedHabits ?? this.showArchivedHabits,
-      hasCompletedOnboarding: hasCompletedOnboarding ?? this.hasCompletedOnboarding,
+      hasCompletedOnboarding:
+          hasCompletedOnboarding ?? this.hasCompletedOnboarding,
     );
   }
 
   @override
-  List<Object?> get props => [themeMode, dailyReminderEnabled, showArchivedHabits, hasCompletedOnboarding];
+  List<Object?> get props => [
+        themeMode,
+        dailyReminderEnabled,
+        showArchivedHabits,
+        hasCompletedOnboarding
+      ];
 }

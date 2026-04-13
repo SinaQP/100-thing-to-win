@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:things_to_win/core/constants/app_routes.dart';
+import 'package:things_to_win/core/theme/app_motion.dart';
 import 'package:things_to_win/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:things_to_win/features/habits/presentation/screens/habits_screen.dart';
 import 'package:things_to_win/features/history/presentation/screens/history_screen.dart';
@@ -16,23 +17,35 @@ class AppNavigationShell extends StatelessWidget {
   final Widget child;
 
   static const _tabs = <_TabDestination>[
-    _TabDestination(label: 'Today', icon: Icons.home_rounded, route: AppRoutes.dashboard),
-    _TabDestination(label: 'Habits', icon: Icons.flag_rounded, route: AppRoutes.habits),
-    _TabDestination(label: 'History', icon: Icons.calendar_month_rounded, route: AppRoutes.history),
-    _TabDestination(label: 'Insights', icon: Icons.insights_rounded, route: AppRoutes.insights),
-    _TabDestination(label: 'Settings', icon: Icons.settings_rounded, route: AppRoutes.settings),
+    _TabDestination(
+        label: 'Today', icon: Icons.home_rounded, route: AppRoutes.dashboard),
+    _TabDestination(
+        label: 'Habits', icon: Icons.flag_rounded, route: AppRoutes.habits),
+    _TabDestination(
+        label: 'History',
+        icon: Icons.calendar_month_rounded,
+        route: AppRoutes.history),
+    _TabDestination(
+        label: 'Insights',
+        icon: Icons.insights_rounded,
+        route: AppRoutes.insights),
+    _TabDestination(
+        label: 'Settings',
+        icon: Icons.settings_rounded,
+        route: AppRoutes.settings),
   ];
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-    final currentIndex = _tabs.indexWhere((tab) => location.startsWith(tab.route));
+    final currentIndex =
+        _tabs.indexWhere((tab) => location.startsWith(tab.route));
 
     return Scaffold(
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
+        duration: AppMotion.short,
+        switchInCurve: AppMotion.enterCurve,
+        switchOutCurve: AppMotion.exitCurve,
         child: child,
       ),
       bottomNavigationBar: NavigationBar(

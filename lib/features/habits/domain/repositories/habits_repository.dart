@@ -11,7 +11,8 @@ abstract class HabitsRepository {
 
   Future<void> updateHabit(Habit habit);
 
-  Future<void> saveHabit(Habit habit); // Backward-compatible create/update alias.
+  Future<void> saveHabit(
+      Habit habit); // Backward-compatible create/update alias.
 
   Future<void> deleteHabit(String habitId);
 

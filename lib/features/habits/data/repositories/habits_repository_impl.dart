@@ -27,13 +27,15 @@ class HabitsRepositoryImpl implements HabitsRepository {
     required DateTime from,
     required DateTime to,
   }) async {
-    final entries = await _localDataSource.getEntriesForRange(habitId: habitId, from: from, to: to);
+    final entries = await _localDataSource.getEntriesForRange(
+        habitId: habitId, from: from, to: to);
     return entries.map((entry) => entry.toEntity()).toList(growable: false);
   }
 
   @override
   Future<List<Habit>> getHabits({bool includeArchived = false}) async {
-    final habits = await _localDataSource.getHabits(includeArchived: includeArchived);
+    final habits =
+        await _localDataSource.getHabits(includeArchived: includeArchived);
     return habits.map((m) => m.toEntity()).toList(growable: false);
   }
 
@@ -60,20 +62,24 @@ class HabitsRepositoryImpl implements HabitsRepository {
 
   @override
   Future<void> setHabitCompletion(HabitEntry entry) async {
-    final completedAt = entry.isCompleted ? (entry.completedAt ?? DateTime.now()) : null;
+    final completedAt =
+        entry.isCompleted ? (entry.completedAt ?? DateTime.now()) : null;
     await _localDataSource.upsertEntry(
       HabitEntryModel.fromEntity(entry.copyWith(completedAt: completedAt)),
     );
   }
 
   @override
-  Future<bool> isHabitCompleted({required String habitId, required DateTime day}) {
+  Future<bool> isHabitCompleted(
+      {required String habitId, required DateTime day}) {
     return _localDataSource.isHabitCompleted(habitId: habitId, day: day);
   }
 
   @override
-  Future<void> archiveHabit({required String habitId, required bool isArchived}) {
-    return _localDataSource.setHabitArchived(id: habitId, isArchived: isArchived);
+  Future<void> archiveHabit(
+      {required String habitId, required bool isArchived}) {
+    return _localDataSource.setHabitArchived(
+        id: habitId, isArchived: isArchived);
   }
 
   @override
@@ -87,7 +93,8 @@ class HabitsRepositoryImpl implements HabitsRepository {
     required DateTime from,
     required DateTime to,
   }) async {
-    final entries = await _localDataSource.getEntriesForRange(habitId: habit.id, from: from, to: to);
+    final entries = await _localDataSource.getEntriesForRange(
+        habitId: habit.id, from: from, to: to);
     return _statsCalculator.calculate(
       start: from,
       end: to,

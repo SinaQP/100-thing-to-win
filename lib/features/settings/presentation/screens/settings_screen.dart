@@ -23,13 +23,23 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Theme Mode', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Theme Mode',
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 10),
                   SegmentedButton<ThemeMode>(
                     segments: const [
-                      ButtonSegment(value: ThemeMode.system, icon: Icon(Icons.phone_android_rounded), label: Text('System')),
-                      ButtonSegment(value: ThemeMode.light, icon: Icon(Icons.light_mode_rounded), label: Text('Light')),
-                      ButtonSegment(value: ThemeMode.dark, icon: Icon(Icons.dark_mode_rounded), label: Text('Dark')),
+                      ButtonSegment(
+                          value: ThemeMode.system,
+                          icon: Icon(Icons.phone_android_rounded),
+                          label: Text('System')),
+                      ButtonSegment(
+                          value: ThemeMode.light,
+                          icon: Icon(Icons.light_mode_rounded),
+                          label: Text('Light')),
+                      ButtonSegment(
+                          value: ThemeMode.dark,
+                          icon: Icon(Icons.dark_mode_rounded),
+                          label: Text('Dark')),
                     ],
                     selected: {selectedMode},
                     onSelectionChanged: (selection) {
@@ -44,13 +54,15 @@ class SettingsScreen extends ConsumerWidget {
           const PlaceholderCard(
             icon: Icons.save_alt_rounded,
             title: 'Local Backup Export',
-            description: 'Phase 2 will export habits and completions to a local JSON backup.',
+            description:
+                'Phase 2 will export habits and completions to a local JSON backup.',
           ),
           const SizedBox(height: 12),
           const PlaceholderCard(
             icon: Icons.restore_rounded,
             title: 'Local Backup Import',
-            description: 'Phase 2 will validate and import backups without cloud dependency.',
+            description:
+                'Phase 2 will validate and import backups without cloud dependency.',
           ),
         ],
       ),

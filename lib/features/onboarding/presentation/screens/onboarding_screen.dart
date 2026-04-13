@@ -18,17 +18,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const _slides = <_OnboardingSlideData>[
     _OnboardingSlideData(
       title: 'Turn Intent Into Daily Wins',
-      subtitle: 'Capture the habits that matter, then win each day with clarity and momentum.',
+      subtitle:
+          'Capture the habits that matter, then win each day with clarity and momentum.',
       icon: Icons.emoji_events_rounded,
     ),
     _OnboardingSlideData(
       title: 'Progress You Can Feel',
-      subtitle: 'Track completion, streaks, and consistency with an offline-first experience that never waits.',
+      subtitle:
+          'Track completion, streaks, and consistency with an offline-first experience that never waits.',
       icon: Icons.stacked_line_chart_rounded,
     ),
     _OnboardingSlideData(
       title: 'Start With Your First Habit',
-      subtitle: 'Choose your category, color, and icon, then build your first daily standard.',
+      subtitle:
+          'Choose your category, color, and icon, then build your first daily standard.',
       icon: Icons.auto_awesome_rounded,
     ),
   ];
@@ -71,7 +74,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              theme.colorScheme.primary.withOpacity(0.12),
+              theme.colorScheme.primary.withValues(alpha: 0.12),
               theme.colorScheme.surface,
             ],
           ),
@@ -84,7 +87,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('100 Things to Win', style: theme.textTheme.titleMedium),
+                    Text('100 Things to Win',
+                        style: theme.textTheme.titleMedium),
                     TextButton(onPressed: _skip, child: const Text('Skip')),
                   ],
                 ),
@@ -117,7 +121,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         borderRadius: BorderRadius.circular(999),
                         color: _index == index
                             ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withOpacity(0.26),
+                            : theme.colorScheme.onSurface
+                                .withValues(alpha: 0.26),
                       ),
                     ),
                   ),
@@ -179,8 +184,8 @@ class _OnboardingSlide extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
               gradient: LinearGradient(
                 colors: [
-                  theme.colorScheme.primary.withOpacity(0.22),
-                  theme.colorScheme.secondary.withOpacity(0.14),
+                  theme.colorScheme.primary.withValues(alpha: 0.22),
+                  theme.colorScheme.secondary.withValues(alpha: 0.14),
                 ],
               ),
             ),
@@ -190,16 +195,17 @@ class _OnboardingSlide extends StatelessWidget {
                 height: 98,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: theme.colorScheme.surface.withOpacity(0.9),
+                  color: theme.colorScheme.surface.withValues(alpha: 0.9),
                   boxShadow: [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.28),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.28),
                       blurRadius: 26,
                       offset: const Offset(0, 10),
                     ),
                   ],
                 ),
-                child: Icon(data.icon, size: 48, color: theme.colorScheme.primary),
+                child:
+                    Icon(data.icon, size: 48, color: theme.colorScheme.primary),
               ),
             ),
           ),

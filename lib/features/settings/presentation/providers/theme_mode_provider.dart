@@ -6,11 +6,13 @@ import 'package:things_to_win/features/settings/data/settings_repository_impl.da
 import 'package:things_to_win/features/settings/domain/entities/app_settings.dart';
 import 'package:things_to_win/features/settings/domain/repositories/settings_repository.dart';
 
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) async {
+final sharedPreferencesProvider =
+    FutureProvider<SharedPreferences>((ref) async {
   return SharedPreferences.getInstance();
 });
 
-final settingsRepositoryProvider = FutureProvider<SettingsRepository>((ref) async {
+final settingsRepositoryProvider =
+    FutureProvider<SettingsRepository>((ref) async {
   final prefs = await ref.watch(sharedPreferencesProvider.future);
   final dataSource = SharedPrefsSettingsDataSource(prefs);
   return SettingsRepositoryImpl(dataSource);
@@ -49,7 +51,9 @@ class AppSettingsNotifier extends AsyncNotifier<AppSettings> {
   }
 }
 
-final appSettingsAsyncProvider = AsyncNotifierProvider<AppSettingsNotifier, AppSettings>(AppSettingsNotifier.new);
+final appSettingsAsyncProvider =
+    AsyncNotifierProvider<AppSettingsNotifier, AppSettings>(
+        AppSettingsNotifier.new);
 
 final appSettingsProvider = Provider<AppSettings>((ref) {
   final settings = ref.watch(appSettingsAsyncProvider).valueOrNull;

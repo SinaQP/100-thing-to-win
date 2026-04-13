@@ -15,13 +15,15 @@ class DashboardScreen extends StatelessWidget {
           PlaceholderCard(
             icon: Icons.stacked_bar_chart_rounded,
             title: 'Today Progress Ring',
-            description: 'Phase 2 will add real-time completion percentage and motivational status.',
+            description:
+                'Phase 2 will add real-time completion percentage and motivational status.',
           ),
           SizedBox(height: 12),
           PlaceholderCard(
             icon: Icons.flash_on_rounded,
             title: 'Current Streak Highlights',
-            description: 'Top streak and recovery suggestions will appear here.',
+            description:
+                'Top streak and recovery suggestions will appear here.',
           ),
         ],
       ),

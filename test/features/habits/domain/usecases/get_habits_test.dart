@@ -51,15 +51,20 @@ class _FakeHabitsRepository implements HabitsRepository {
   Future<void> updateHabitOrder(List<String> orderedHabitIds) async {}
 
   @override
-  Future<void> archiveHabit({required String habitId, required bool isArchived}) async {}
+  Future<void> archiveHabit(
+      {required String habitId, required bool isArchived}) async {}
 
   @override
-  Future<bool> isHabitCompleted({required String habitId, required DateTime day}) async {
+  Future<bool> isHabitCompleted(
+      {required String habitId, required DateTime day}) async {
     return false;
   }
 
   @override
-  Future<HabitStats> getHabitStats({required Habit habit, required DateTime from, required DateTime to}) async {
+  Future<HabitStats> getHabitStats(
+      {required Habit habit,
+      required DateTime from,
+      required DateTime to}) async {
     return const HabitStats(
       currentStreak: 0,
       bestStreak: 0,

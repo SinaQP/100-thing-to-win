@@ -6,11 +6,13 @@ void main() {
   group('HabitStatsCalculator', () {
     const calculator = HabitStatsCalculator();
 
-    test('calculates current streak, best streak, and completion percentage', () {
+    test('calculates current streak, best streak, and completion percentage',
+        () {
       final entries = [
         HabitEntry(habitId: 'h1', day: DateTime(2026, 4, 1), isCompleted: true),
         HabitEntry(habitId: 'h1', day: DateTime(2026, 4, 2), isCompleted: true),
-        HabitEntry(habitId: 'h1', day: DateTime(2026, 4, 3), isCompleted: false),
+        HabitEntry(
+            habitId: 'h1', day: DateTime(2026, 4, 3), isCompleted: false),
         HabitEntry(habitId: 'h1', day: DateTime(2026, 4, 4), isCompleted: true),
         HabitEntry(habitId: 'h1', day: DateTime(2026, 4, 5), isCompleted: true),
       ];

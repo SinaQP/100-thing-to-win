@@ -11,7 +11,8 @@ abstract class HabitsLocalDataSource {
   Future<void> deleteHabit(String id);
   Future<void> updateSortOrder(List<String> ids);
   Future<void> upsertEntry(HabitEntryModel model);
-  Future<bool> isHabitCompleted({required String habitId, required DateTime day});
+  Future<bool> isHabitCompleted(
+      {required String habitId, required DateTime day});
   Future<List<HabitEntryModel>> getEntriesForRange({
     String? habitId,
     required DateTime from,
@@ -36,18 +37,21 @@ class SqfliteHabitsLocalDataSource implements HabitsLocalDataSource {
 
   @override
   Future<HabitModel?> getHabitById(String id) async {
-    final maps = await _db.query('habits', where: 'id = ?', whereArgs: [id], limit: 1);
+    final maps =
+        await _db.query('habits', where: 'id = ?', whereArgs: [id], limit: 1);
     if (maps.isEmpty) return null;
     return HabitModel.fromMap(maps.first);
   }
 
   @override
   Future<void> upsertHabit(HabitModel model) async {
-    await _db.insert('habits', model.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await _db.insert('habits', model.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
-  Future<void> setHabitArchived({required String id, required bool isArchived}) async {
+  Future<void> setHabitArchived(
+      {required String id, required bool isArchived}) async {
     await _db.update(
       'habits',
       {'is_archived': isArchived ? 1 : 0},
@@ -66,18 +70,21 @@ class SqfliteHabitsLocalDataSource implements HabitsLocalDataSource {
   Future<void> updateSortOrder(List<String> ids) async {
     final batch = _db.batch();
     for (var i = 0; i < ids.length; i++) {
-      batch.update('habits', {'sort_order': i}, where: 'id = ?', whereArgs: [ids[i]]);
+      batch.update('habits', {'sort_order': i},
+          where: 'id = ?', whereArgs: [ids[i]]);
     }
     await batch.commit(noResult: true);
   }
 
   @override
   Future<void> upsertEntry(HabitEntryModel model) async {
-    await _db.insert('habit_entries', model.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await _db.insert('habit_entries', model.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
-  Future<bool> isHabitCompleted({required String habitId, required DateTime day}) async {
+  Future<bool> isHabitCompleted(
+      {required String habitId, required DateTime day}) async {
     final maps = await _db.query(
       'habit_entries',
       columns: ['is_completed'],
