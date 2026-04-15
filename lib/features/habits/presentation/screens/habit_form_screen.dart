@@ -100,10 +100,11 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
 
     setState(() => _isSaving = true);
 
+    final title = _titleController.text.trim();
+    final descriptionRaw = _descriptionController.text.trim();
+
     try {
       final habitsActions = ref.read(habitsActionsProvider);
-      final title = _titleController.text.trim();
-      final descriptionRaw = _descriptionController.text.trim();
 
       if (_isEditing && _editingHabit != null) {
         final updatedHabit = _editingHabit!.copyWith(
@@ -128,39 +129,74 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
         );
         await habitsActions.createHabit(newHabit);
       }
-
-      if (!mounted) {
-        return;
-      }
-
-      if (widget.isFirstHabitSetup) {
-        await ref.read(appSettingsAsyncProvider.notifier).completeOnboarding();
-        if (!mounted) {
-          return;
-        }
-        context.go(AppRoutes.dashboard);
-        return;
-      }
-
-      if (context.canPop()) {
-        context.pop();
-      } else {
-        context.go(AppRoutes.habits);
-      }
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not save the habit. Please try again.'),
-        ),
-      );
-    } finally {
+    } catch (error, stackTrace) {
+      _logSaveError('habit persistence', error, stackTrace);
+      _showMessage('Could not save the habit. Please try again.');
       if (mounted) {
         setState(() => _isSaving = false);
       }
+      return;
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    if (widget.isFirstHabitSetup) {
+      try {
+        await _markOnboardingCompleted();
+      } catch (error, stackTrace) {
+        _logSaveError('onboarding completion', error, stackTrace);
+        _showMessage('Habit saved, but onboarding could not be completed.');
+        if (mounted) {
+          setState(() => _isSaving = false);
+        }
+        return;
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      context.go(AppRoutes.dashboard);
+      return;
+    }
+
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.habits);
+    }
+
+    if (mounted) {
+      setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _markOnboardingCompleted() async {
+    final settingsRepository =
+        await ref.read(settingsRepositoryProvider.future);
+    final settings = await settingsRepository.getSettings();
+    if (!settings.hasCompletedOnboarding) {
+      await settingsRepository.saveSettings(
+        settings.copyWith(hasCompletedOnboarding: true),
+      );
+      ref.invalidate(appSettingsAsyncProvider);
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void _logSaveError(Object phase, Object error, StackTrace stackTrace) {
+    debugPrint('Habit form error during $phase: $error');
+    debugPrintStack(stackTrace: stackTrace);
   }
 
   @override
