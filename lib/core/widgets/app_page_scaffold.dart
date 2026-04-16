@@ -25,82 +25,77 @@ class AppPageScaffold extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = context.appColors;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: DecoratedBox(
-        decoration: BoxDecoration(gradient: colors.pageGradient),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -90,
-              right: -30,
-              child: IgnorePointer(
-                child: _GlowOrb(
-                  color: colors.backgroundGlow
-                      .withValues(alpha: colors.isDark ? 0.22 : 0.2),
-                  size: 240,
-                ),
+    return DecoratedBox(
+      decoration: BoxDecoration(gradient: colors.pageGradient),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -90,
+            right: -30,
+            child: IgnorePointer(
+              child: _GlowOrb(
+                color: colors.backgroundGlow
+                    .withValues(alpha: colors.isDark ? 0.22 : 0.2),
+                size: 240,
               ),
             ),
-            Positioned(
-              bottom: 80,
-              left: -50,
-              child: IgnorePointer(
-                child: _GlowOrb(
-                  color: colors.accent
-                      .withValues(alpha: colors.isDark ? 0.12 : 0.08),
-                  size: 180,
-                ),
+          ),
+          Positioned(
+            bottom: 80,
+            left: -50,
+            child: IgnorePointer(
+              child: _GlowOrb(
+                color: colors.accent
+                    .withValues(alpha: colors.isDark ? 0.12 : 0.08),
+                size: 180,
               ),
             ),
-            SafeArea(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxContentWidth),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: padding,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(title,
-                                        style: theme.textTheme.displaySmall),
-                                    const SizedBox(height: AppSpacing.xs),
-                                    Text(
-                                      subtitle,
-                                      style: theme.textTheme.bodyLarge
-                                          ?.copyWith(
-                                              color: colors.textSecondary),
-                                    ),
-                                  ],
-                                ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxContentWidth),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: padding,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(title, style: theme.textTheme.displaySmall),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    subtitle,
+                                    style: theme.textTheme.bodyLarge
+                                        ?.copyWith(color: colors.textSecondary),
+                                  ),
+                                ],
                               ),
-                              if (trailing != null) ...[
-                                const SizedBox(width: AppSpacing.md),
-                                trailing!,
-                              ],
+                            ),
+                            if (trailing != null) ...[
+                              const SizedBox(width: AppSpacing.md),
+                              trailing!,
                             ],
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          Expanded(child: body),
-                        ],
-                      ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        Expanded(child: body),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
