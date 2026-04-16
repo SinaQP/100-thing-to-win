@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:things_to_win/core/constants/app_routes.dart';
-import 'package:things_to_win/core/theme/app_motion.dart';
 import 'package:things_to_win/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:things_to_win/features/habits/presentation/screens/habits_screen.dart';
 import 'package:things_to_win/features/history/presentation/screens/history_screen.dart';
@@ -42,10 +41,8 @@ class AppNavigationShell extends StatelessWidget {
         _tabs.indexWhere((tab) => location.startsWith(tab.route));
 
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: AppMotion.short,
-        switchInCurve: AppMotion.enterCurve,
-        switchOutCurve: AppMotion.exitCurve,
+      body: KeyedSubtree(
+        key: ValueKey<String>(location),
         child: child,
       ),
       bottomNavigationBar: NavigationBar(

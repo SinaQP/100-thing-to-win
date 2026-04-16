@@ -58,38 +58,42 @@ class AppPageScaffold extends StatelessWidget {
                 alignment: Alignment.topCenter,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: maxContentWidth),
-                  child: Padding(
-                    padding: padding,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(title,
-                                      style: theme.textTheme.displaySmall),
-                                  const SizedBox(height: AppSpacing.xs),
-                                  Text(
-                                    subtitle,
-                                    style: theme.textTheme.bodyLarge
-                                        ?.copyWith(color: colors.textSecondary),
-                                  ),
-                                ],
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: padding,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(title,
+                                        style: theme.textTheme.displaySmall),
+                                    const SizedBox(height: AppSpacing.xs),
+                                    Text(
+                                      subtitle,
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                              color: colors.textSecondary),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            if (trailing != null) ...[
-                              const SizedBox(width: AppSpacing.md),
-                              trailing!,
+                              if (trailing != null) ...[
+                                const SizedBox(width: AppSpacing.md),
+                                trailing!,
+                              ],
                             ],
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        Expanded(child: body),
-                      ],
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                          Expanded(child: body),
+                        ],
+                      ),
                     ),
                   ),
                 ),
