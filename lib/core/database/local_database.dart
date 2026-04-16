@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -85,6 +86,10 @@ class LocalDatabase {
   }
 
   static Future<String> _defaultDbPathProvider() async {
+    if (kIsWeb) {
+      return 'things_to_win.db';
+    }
+
     final dir = await getApplicationDocumentsDirectory();
     return p.join(dir.path, 'things_to_win.db');
   }
