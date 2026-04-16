@@ -93,7 +93,7 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(56),
+          minimumSize: const Size(0, 56),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xl,
             vertical: AppSpacing.md,
@@ -109,7 +109,7 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size(0, 52),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.md,
