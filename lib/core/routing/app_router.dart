@@ -7,6 +7,23 @@ import 'package:things_to_win/features/habits/presentation/screens/habit_form_sc
 import 'package:things_to_win/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:things_to_win/features/settings/presentation/providers/theme_mode_provider.dart';
 
+String? onboardingRedirectFor({
+  required bool hasCompletedOnboarding,
+  required String location,
+}) {
+  final inOnboarding = location.startsWith(AppRoutes.onboarding);
+
+  if (!hasCompletedOnboarding && !inOnboarding) {
+    return AppRoutes.onboarding;
+  }
+
+  if (hasCompletedOnboarding && inOnboarding) {
+    return AppRoutes.dashboard;
+  }
+
+  return null;
+}
+
 final appRouterProvider = Provider<GoRouter>(
   (ref) => GoRouter(
     initialLocation: AppRoutes.dashboard,
@@ -16,17 +33,10 @@ final appRouterProvider = Provider<GoRouter>(
       final settings = await settingsRepository.getSettings();
       final hasCompletedOnboarding = settings.hasCompletedOnboarding;
       final location = state.uri.path;
-      final inOnboarding = location.startsWith(AppRoutes.onboarding);
-
-      if (!hasCompletedOnboarding && !inOnboarding) {
-        return AppRoutes.onboarding;
-      }
-
-      if (hasCompletedOnboarding && inOnboarding) {
-        return AppRoutes.dashboard;
-      }
-
-      return null;
+      return onboardingRedirectFor(
+        hasCompletedOnboarding: hasCompletedOnboarding,
+        location: location,
+      );
     },
     routes: [
       GoRoute(

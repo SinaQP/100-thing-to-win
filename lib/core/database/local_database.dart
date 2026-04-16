@@ -3,17 +3,27 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class LocalDatabase {
-  LocalDatabase._();
+  LocalDatabase._({
+    Future<String> Function()? dbPathProvider,
+  }) : _dbPathProvider = dbPathProvider ?? _defaultDbPathProvider;
 
   static final instance = LocalDatabase._();
   Database? _database;
   static const _dbVersion = 4;
+  final Future<String> Function() _dbPathProvider;
+
+  factory LocalDatabase.forTesting({
+    required String databasePath,
+  }) {
+    return LocalDatabase._(
+      dbPathProvider: () async => databasePath,
+    );
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    final dir = await getApplicationDocumentsDirectory();
-    final path = p.join(dir.path, 'things_to_win.db');
+    final path = await _dbPathProvider();
 
     _database = await openDatabase(
       path,
@@ -63,6 +73,20 @@ class LocalDatabase {
     );
 
     return _database!;
+  }
+
+  Future<void> close() async {
+    final db = _database;
+    if (db == null) {
+      return;
+    }
+    await db.close();
+    _database = null;
+  }
+
+  static Future<String> _defaultDbPathProvider() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return p.join(dir.path, 'things_to_win.db');
   }
 
   Future<void> _createSchemaV3(Database db) async {

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:things_to_win/core/database/local_database.dart';
+import 'package:things_to_win/features/settings/data/datasources/settings_backup_local_data_source.dart';
 import 'package:things_to_win/features/settings/data/datasources/settings_local_data_source.dart';
 import 'package:things_to_win/features/settings/data/settings_repository_impl.dart';
 import 'package:things_to_win/features/settings/domain/entities/app_settings.dart';
@@ -14,8 +17,14 @@ final sharedPreferencesProvider =
 final settingsRepositoryProvider =
     FutureProvider<SettingsRepository>((ref) async {
   final prefs = await ref.watch(sharedPreferencesProvider.future);
+  final db = await ref.watch(settingsDatabaseProvider.future);
   final dataSource = SharedPrefsSettingsDataSource(prefs);
-  return SettingsRepositoryImpl(dataSource);
+  final backupDataSource = SettingsBackupLocalDataSource(db);
+  return SettingsRepositoryImpl(dataSource, backupDataSource);
+});
+
+final settingsDatabaseProvider = FutureProvider<Database>((ref) async {
+  return LocalDatabase.instance.database;
 });
 
 class AppSettingsNotifier extends AsyncNotifier<AppSettings> {
